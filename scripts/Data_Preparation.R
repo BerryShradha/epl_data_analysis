@@ -10,25 +10,26 @@
 
 #######################################################################
 
+#Function to combine part csvs to whole
+combine <- function(path, csv_name) {
+  setwd(path)
+  filenames <- list.files()
+  data <- Reduce(rbind, lapply(filenames, read.csv))
+  #write.csv(data, csv_name, row.names = F) 
+  return (data)
+}
 
 #Load epl data. Combine multiple files into one (one-time execution)
-setwd("./EPL_Results")
-epl_filenames <- list.files()
-epl_data <- Reduce(rbind, lapply(epl_filenames, read.csv))
-write.csv(epl_data, "epl.csv", row.names = F) 
+epl_data <- combine("./EPL_Results", "epl.csv")
+str(epl_data)
+
+setwd("C:/Users/Shradha/Desktop/Study/2. Big Data Analytics/Coursework/epl_data_analysis/data")
 
 #Load weather data. Merge multiple files into one (one-time execution)
-setwd("./Weather")
-weather_filenames <- list.files()
-weather_data <- Reduce(rbind, lapply(weather_filenames, read.csv))
-write.csv(weather_data, "weather.csv", row.names = F)
-
-#load consolidated epl data and consolidated weather data ans inspect
-setwd("./Data")
-epl_data <- read.csv("epl.csv", header = T, stringsAsFactors = F)
-weather_data <- read.csv("weather.csv", header = T, stringsAsFactors = F)
-str(epl_data)
+weather_data <- combine("./Weather", "weather.csv")
 str(weather_data)
+
+setwd("C:/Users/Shradha/Desktop/Study/2. Big Data Analytics/Coursework/epl_data_analysis/data")
 
 #install.packages("readxl")
 library("readxl")
@@ -37,23 +38,25 @@ mapping_data <- read_excel("Dates_location_mapping.xlsx")
 str(mapping_data)
 
 #Bring all joining column datatypes in sync
-#colnames(mapping_data)[3] <- "HomeTeam"
 mapping_data$Date <- as.character.Date(mapping_data$Date)
 epl_data$Date <- as.character.Date(epl_data$Date)
-#colnames(weather_data)[1] <- "Date"
-weather_data$Date <- as.character.Date(weather_data$Date)
-#colnames(weather_data)[39] <- "Id"
-#colnames(weather_data)[40] <- "Location"
+epl_data$HomeTeam <- as.character.factor(epl_data$HomeTeam)
+weather_data$daily.time <- as.character.Date(weather_data$daily.time)
 
 library("dplyr")
-#Merge weather with epl results
+#Merge weather with epl using mapping data
 epl_mapping_data <- left_join(epl_data, mapping_data, by = c("Date" = "Date", "HomeTeam" = "Home Team"))
 str(epl_mapping_data)
-str(weather_data)
 merged_data <- left_join(epl_mapping_data, weather_data,
                           by = c("Date" = "daily.time", "Latitude" = "latitude", "Longitude" = "longitude"))
 str(merged_data)
-write.table(merged_data, "merged.csv", sep = ",", row.names = F)
+#write.table(merged_data, "merged.csv", sep = ",", row.names = F)
 
-#Exploratory Analysis of EPL data
-cor(epl_data)
+#Check for duplicates
+table(duplicated(merged_data))
+
+#Check for missing data
+merged_data_na <- apply(is.na(merged_data), 2, sum) #Check which attributes have NAs. 
+merged_data_na #Shows 19 weather records are consistently NA.  
+subset(merged_data, is.na(merged_data$daily.summary)) != 0 #Check all records where daily.summary is NA. Shows all matches from 0910 for Fulham
+
