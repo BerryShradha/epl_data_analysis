@@ -201,8 +201,7 @@ library(gridExtra)
 
 # Same day weather difference between locations
 par(mar = c(6.5, 6.5, 0.5, 0.5), mgp = c(5, 1, 0))
-format(as.Date(final_data$Date,'%Y-%m-%d'), '%Y')
-format(tmp,'%Y')
+
 #Specific clubs, 2018
 ggplot(filter(final_data, HomeTeam %in% c("Chelsea", "Liverpool", "Man United") & format(as.Date(Date,'%Y-%m-%d'), '%Y') == 2018), 
        aes(x = Date, y = daily.temperatureMax, group = HomeTeam)) + 
