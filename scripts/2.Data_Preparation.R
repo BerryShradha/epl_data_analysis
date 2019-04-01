@@ -169,7 +169,7 @@ final_data <- select (merged_data_clean,-c(Referee, FTHG, FTAG, Id, Club, Coordi
                                       daily.apparentTemperatureHighTime,daily.apparentTemperatureLowTime, 
                                       daily.windGustTime, daily.uvIndexTime, daily.temperatureMinTime, 
                                       daily.temperatureMaxTime,daily.apparentTemperatureMinTime, 
-                                      daily.apparentTemperatureMaxTime, location, home.team))
+                                      daily.apparentTemperatureMaxTime, location, home.team, HTR))
 str(final_data)
 # 6. Analyse outliers
 #install.packages("qpcR")
